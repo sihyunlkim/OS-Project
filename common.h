@@ -21,4 +21,6 @@ typedef struct {
     int num_cmds;       // Total number of commands (to determine pipe count) 
 } ExecutionPlan;
 
+void execute_plan(ExecutionPlan *plan);
+
 #endif
