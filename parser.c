@@ -4,6 +4,22 @@
 #include "common.h"
 
 // function to count the number of tokens 
+static int count_num_tokens(char *str){
+    int count = 0; 
+    // make a copy of str so that we can keep the original form of it even after editing it
+    char *copy = strdup(str); 
+    // replace the space with the null terminator
+    char *token = strtok(copy, " "); 
+    // loop through the command line to count the number of commands 
+    while (token){
+        count++; 
+        token = strtok(NULL, " "); 
+    }
+    // free the allocated memory
+    free(copy); 
+
+    return count; 
+}
 
 // function to parse the line 
 ExecutionPlan* parse_line(char *line){
@@ -35,14 +51,14 @@ ExecutionPlan* parse_line(char *line){
     // allocate memory space to store all the commands in the user input
     new_plan->cmds = malloc(sizeof(Command) * new_plan->num_cmds); 
 
-    for (int i = 0; i < new_plan->nums_cmds; i++){
+    for (int i = 0; i < new_plan->num_cmds; i++){
         // data cleansing by initializing them to null
         new_plan->cmds[i].input_file = NULL; 
         new_plan->cmds[i].output_file = NULL; 
         new_plan->cmds[i].error_file = NULL; 
 
         // get the number of tokens
-        int numOfTokens = count_tokens(steps[i]); 
+        int numOfTokens = count_num_tokens(steps[i]); 
 
         // creates address space for each command segment to be executed, including NULL
         new_plan->cmds[i].argv = malloc(sizeof(char*) * (numOfTokens + 1)); 
@@ -50,7 +66,7 @@ ExecutionPlan* parse_line(char *line){
         int arg_idx = 0; 
         // search for seperators (space, enter, etc) and replace it with null terminator 
         // return the memory address of the first character of the command 
-        char *token = strtok(stages[i], " \n\t"); 
+        char *token = strtok(steps[i], " \n\t"); 
         while (token){
             if (strcmp(token, "<") == 0){
                 // return the file name
@@ -85,7 +101,7 @@ ExecutionPlan* parse_line(char *line){
             } else{
                 // store other commands into argv
                 new_plan->cmds[i].argv[arg_idx] = strdup(token); 
-                ard_idx++; 
+                arg_idx++; 
             }
             // return the first character of the new word
             token = strtok(NULL, " \n\t"); 
