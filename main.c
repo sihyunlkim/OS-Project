@@ -1,28 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "common.h"
 
+extern ExecutionPlan *parse_line(char *line); 
+
 int main() {
-    printf("--- Starting Input Redirection Test: wc -w < test_input.txt ---\n");
+    char line[1024]; 
 
-    // 1. Setup the command: "wc" "-w"
-    char *wc_args[] = {"wc", "-w", NULL};
-    Command cmd1;
-    cmd1.argv = wc_args;
-    
-    // 2. Set the input file (This is the < part)
-    cmd1.input_file = "test_input.txt"; 
-    cmd1.output_file = NULL;
-    cmd1.error_file = NULL;
+    while (1){
+        // immediately show user input (flush out the user input stored in the buffer)
+        printf("$ "); 
+        fflush(stdout); 
 
-    // 3. Assemble the Execution Plan (Just 1 command this time)
-    ExecutionPlan plan;
-    plan.cmds = &cmd1;
-    plan.num_cmds = 1;
+        // check if there is any data in the user input stream
+        if (!fgets(line, sizeof(line), stdin)){
+            break; 
+        }
 
-    // 4. Run YOUR Executor
-    execute_plan(&plan);
+        // remove the new line character 
+        line[strcspn(line, "\n")] = 0;
 
-    printf("--- Test Complete ---\n");
-    return 0;
+        // if user inputs exit command, we exit the shell
+        if (strcmp(line, "exit") == 0){
+            break; 
+        }
+
+        // skip if the input is empty 
+        if (strlen(line) == 0){
+            continue; 
+        }
+
+        // start parsing the line 
+        ExecutionPlan *new_plan = parse_line(line); 
+        if (new_plan){
+            execute_plan(new_plan); 
+        }
+    }
+
+    return 0; 
 }
