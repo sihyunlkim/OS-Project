@@ -8,14 +8,14 @@
 void execute_plan (ExecutionPlan *plan){
     int i; 
     int pipes= plan -> num_cmds-1; //calculating number of pipes
-    int pipefds[2*pipes];  //array holding pipe file descriptiors
+    int pipefds[pipes > 0 ? 2 * pipes : 1];  //array holding pipe file descriptiors
 
     //creating pipes for n commands:
     for (i=0; i< pipes; i++){
         if (pipe(pipefds + i * 2) < 0) {
                     perror("pipe");
                     exit(1);
-                }
+                };
         }
 
     for (i=0; i< plan-> num_cmds; i++){
@@ -47,6 +47,7 @@ void execute_plan (ExecutionPlan *plan){
             // O_TRUNC is used to overwrite the file if it already exists.
             if (plan->cmds[i].output_file) { 
                 int fd = open(plan->cmds[i].output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (fd < 0) { perror("Output file error"); exit(1); }
                 dup2(fd, STDOUT_FILENO); 
                 close(fd); 
             }
@@ -55,12 +56,19 @@ void execute_plan (ExecutionPlan *plan){
 
             if (plan->cmds[i].error_file) {
                 int fd = open(plan->cmds[i].error_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (fd < 0) { perror("Error file error"); exit(1); }
                 dup2(fd, STDERR_FILENO); 
                 close(fd);
             }
+
+
             // execution
+            if (plan->cmds[i].argv[0] == NULL) {
+            fprintf(stderr, "No command specified.\n");
+            exit(1);
+                }
             execvp(plan->cmds[i].argv[0], plan->cmds[i].argv); //execvp searches the PATH environment variable for the executable.
-            perror("Execution failed"); //only prints if execvp fails 
+            fprintf(stderr, "%s: Command not found.\n", plan->cmds[i].argv[0]); //only prints if execvp fails 
             exit(1);
 
         
