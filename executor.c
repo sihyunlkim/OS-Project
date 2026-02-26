@@ -22,7 +22,7 @@ void execute_plan (ExecutionPlan *plan){
         pid_t pid = fork(); // creating a child process for each command
         
         if (pid==0){// inside child process
-        // PIPES 
+        // PIPES FIRST
         if (i>0){// if not first command, take input from previous pipe 
             dup2(pipefds[(i - 1) * 2], STDIN_FILENO);
             
@@ -35,7 +35,7 @@ void execute_plan (ExecutionPlan *plan){
         // close all pipe copies in child
             for (int j = 0; j < 2 * pipes; j++) close(pipefds[j]);
 
-        // file redirections
+        // file redirections after
         //handle input redirection (<)- replace stdin with a file.
             if (plan->cmds[i].input_file) { 
                 int fd = open(plan->cmds[i].input_file, O_RDONLY);
