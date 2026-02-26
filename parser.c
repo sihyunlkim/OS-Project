@@ -3,8 +3,8 @@
 #include <string.h>
 #include "common.h"
 
-// function to count the number of tokens
-// skips redirection operators (<, >, 2>) and their filenames
+
+// fuction to count the number of tokens by skipping redirection operators and filenames
 // so that argv is allocated with the correct size
 static int count_num_tokens(char *str){
     int count = 0;

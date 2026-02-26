@@ -1,12 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "common.h"
 
 extern ExecutionPlan *parse_line(char *line); 
 
+// function to catch the keyboard interruptor 
+void catch_interrupt(int sig){
+    // display the new input line when ctrl + c is pressed 
+    printf("\n$ "); 
+    fflush(stdout); 
+}
+
 int main() {
     char line[1024]; 
+
+    // call catch_interrupt when the OS receives SIGINT
+    signal(SIGINT, catch_interrupt); 
 
     while (1){
         // immediately show user input (flush out the user input stored in the buffer)
