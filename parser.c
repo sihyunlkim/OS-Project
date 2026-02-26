@@ -27,7 +27,7 @@ static int count_num_tokens(char *str){
 ExecutionPlan* parse_line(char *line){
 
     // check whether user input has useful information or not
-    if (!line || strlen(line) <= 1){
+    if (!line || strlen(line) < 1){
         return NULL;
     }
 

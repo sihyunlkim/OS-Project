@@ -46,6 +46,8 @@ int main() {
         ExecutionPlan *new_plan = parse_line(line); 
         if (new_plan){
             execute_plan(new_plan); 
+            free_plan(new_plan); 
+            
         }
     }
 

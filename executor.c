@@ -5,6 +5,27 @@
 #include <sys/wait.h>
 #include "common.h"
 
+void free_plan(ExecutionPlan *plan) {
+    if (!plan) return;
+    for (int i = 0; i < plan->num_cmds; i++) {
+        // free each argument string
+        if (plan->cmds[i].argv) {
+            for (int j = 0; plan->cmds[i].argv[j] != NULL; j++) {
+                free(plan->cmds[i].argv[j]);
+            }
+            free(plan->cmds[i].argv);
+        }
+        // free redirection filenames
+        if (plan->cmds[i].input_file)  free(plan->cmds[i].input_file);
+        if (plan->cmds[i].output_file) free(plan->cmds[i].output_file);
+        if (plan->cmds[i].error_file)  free(plan->cmds[i].error_file);
+    }
+    free(plan->cmds);
+    free(plan);
+}
+
+
+
 void execute_plan (ExecutionPlan *plan){
     int i; 
     int pipes= plan -> num_cmds-1; //calculating number of pipes
