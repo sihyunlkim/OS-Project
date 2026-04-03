@@ -164,11 +164,28 @@ int main() {
                 free_plan(plan);
             }
 
-            // send the captured output back to the client
-            printf("[OUTPUT] Sending output to client:\n%s\n", output);
+            // check if output contains error indicators
+            int is_error = (strstr(output, "not found") != NULL ||
+                            strstr(output, "Not found") != NULL ||
+                            strstr(output, "No such file") != NULL ||
+                            strstr(output, "Error") != NULL ||
+                            strstr(output, "error") != NULL);
+
+            // print server log differently based on error or not
+            if (is_error) {
+                printf("[ERROR] %s", output);
+                printf("[OUTPUT] Sending error message to client: \"%s\"\n", output);
+            } else {
+                printf("[OUTPUT] Sending output to client:\n%s\n", output);
+            }
             fflush(stdout);
 
-            send(client_fd, output, strlen(output), 0);
+            // always send something so client doesn't hang waiting
+            if (strlen(output) == 0) {
+                send(client_fd, "\n", 1, 0);
+            } else {
+                send(client_fd, output, strlen(output), 0);
+            }
             free(output);
         }
 

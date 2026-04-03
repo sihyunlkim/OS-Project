@@ -101,7 +101,7 @@ void execute_plan(ExecutionPlan *plan) {
                 exit(1);
             }
             execvp(plan->cmds[i].argv[0], plan->cmds[i].argv); // execvp searches PATH for the executable
-            fprintf(stderr, "%s: Command not found.\n", plan->cmds[i].argv[0]); // only prints if execvp fails
+            fprintf(stderr, "Command not found: %s\n", plan->cmds[i].argv[0]); // only prints if execvp fails
             exit(1);
         }
     }

@@ -21,9 +21,28 @@ static char *next_token(char **cursor) {
     }
 
     // handle quoted strings (single or double quotes)
-    if (*start == '"' || *start == '\'') {
+    //also handle the cases where the first character is a unicode quote like “ or ” (0xe2 0x80 0x9c in UTF-8)
+    if (*start == '"' || *start == '\'' ||  (unsigned char)*start == 0xe2 ){
+    
         char quote = *start;
-        char *end = strchr(start + 1, quote);
+        char *end; 
+        
+    // left single curly quote ' (UTF-8: e2 80 98) -> match right curly quote ' (e2 80 99)
+    if ((unsigned char)*start == 0xe2 && (unsigned char)*(start+1) == 0x80 && (unsigned char)*(start+2) == 0x98) {
+        // find matching right curly quote
+        end = strstr(start + 3, "\xe2\x80\x99");
+        if (end) {
+            int len = end - start - 3;
+            char *token = malloc(len + 1);
+            strncpy(token, start + 3, len);
+            token[len] = '\0';
+            *cursor = end + 3;  // curly quote is 3 bytes
+            return token;
+        }
+    }
+        
+    //normal straight quotes
+        end = strchr(start + 1, quote);
         if (end) {
             // strip the surrounding quotes by duplicating only the inner content
             int len = end - start - 1;
