@@ -76,11 +76,38 @@ int main(int argc, char *argv[]){
         }
 
         // receive the response from the server using while loop
+        while (1){
+            // fill the response buffer with 0 for cleaning  
+            memset(response, 0, sizeOfBuffer); 
+            // receive the response from the server
+            int num_bytes_received = recv(sock_fd, response, sizeOfBuffer - 1, 0); 
 
+            // error handling 
+            if (num_bytes_received < 0){
+                perror("recv() failed"); 
+                break; 
+            }
 
+            // exit if the server has disconnected
+            if (num_bytes_received == 0){
+                printf("Server has disconnected.\n"); 
+                close(sock_fd); 
+                exit(1); 
+            }
+
+            // null terminate to treat response as C string
+            response[num_bytes_received] = '\0'; 
+            printf("%s", response); 
+            fflush(stdout); 
+
+            // break if we received all the data 
+            if (num_bytes_received < sizeOfBuffer - 1){
+                break; 
+            }
+        }
     }
 
-
-
+    // close the socket 
+    close(sock_fd); 
     return 0; 
 }
