@@ -168,7 +168,12 @@ int main() {
             printf("[OUTPUT] Sending output to client:\n%s\n", output);
             fflush(stdout);
 
-            send(client_fd, output, strlen(output), 0);
+            // if the output is empty, then return new character line to the client (avoiding nothing getting returned)
+            if (strlen(output) == 0){
+                send(client_fd, "\n", 1, 0);
+            } else { 
+                send(client_fd, output, strlen(output), 0);
+            }
             free(output);
         }
 
