@@ -31,7 +31,7 @@ clean:
 	rm -f $(TARGET) $(OBJS) server client server.o client.o
 
 server: server.o executor.o parser.o
-	$(CC) $(CFLAGS) -o server server.o executor.o parser.o
+	$(CC) $(CFLAGS) -o server server.o executor.o parser.o -lpthread
 
 server.o: server.c common.h
 	$(CC) $(CFLAGS) -c server.c
