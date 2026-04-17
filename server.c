@@ -130,8 +130,9 @@ void *handling_client(void *arg){
         if (strcmp(buffer, "exit") == 0){
             printf("[INFO] %s Client requested disconnect. Closing connection.\n", label);
             fflush(stdout);
-            // send the diconnection message to the client
-            const char *message = "Disconnected from server.\n";
+            // send the disconnection message to the client followed by the EOF sentinel
+            // so the client's recv loop knows the message is fully received
+            const char *message = "Disconnected from server.\n\x04";
             send(client_arg->client_fd, message, strlen(message), 0); 
             break; 
         }
@@ -169,13 +170,17 @@ void *handling_client(void *arg){
 
         fflush(stdout); 
 
-        // send a newline character at least when executing commands does not produce any outputs
-        // since client gets stuck on recv()
+        // always append the EOF sentinel (\x04) after the output so the client's
+        // recv loop knows when the full response has been received and can stop waiting.
+        // if there is no output, send a newline followed by the sentinel to prevent
+        // the client from getting stuck on recv().
         if (strlen(output) == 0){
-            send(client_arg->client_fd, "\n", 1, 0); 
+            send(client_arg->client_fd, "\n\x04", 2, 0); 
         } else{
             // send the output to the client
             send(client_arg->client_fd, output, strlen(output), 0);
+            // send the EOF sentinel to signal end of output
+            send(client_arg->client_fd, "\x04", 1, 0);
         }
 
         // free the memory
@@ -231,7 +236,7 @@ int main() {
 
     // accept one client connection at a time in a loop
     while (1) {
-        // make struct to stor the client's info
+        // make struct to store the client's info
         struct sockaddr_in client_addr; 
         socklen_t client_addrlen = sizeof(client_addr); 
 

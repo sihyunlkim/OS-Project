@@ -72,10 +72,20 @@ int main(int argc, char *argv[]){
 
         // end the program if the user enters exit
         if (strcmp(input, "exit") == 0){
+            // still receive the final "Disconnected from server." message before quitting
+            memset(response, 0, sizeOfBuffer);
+            recv(sock_fd, response, sizeOfBuffer - 1, 0);
+            // strip the EOF sentinel before printing
+            char *eof_pos = memchr(response, '\x04', sizeOfBuffer);
+            if (eof_pos) *eof_pos = '\0';
+            printf("%s", response);
+            fflush(stdout);
             break; 
         }
 
-        // receive the response from the server using while loop
+        // receive the full response from the server using a loop.
+        // the server appends an EOF sentinel (\x04) to signal the end of each response,
+        // so we keep calling recv() until we detect it in the received data.
         while (1){
             // fill the response buffer with 0 for cleaning  
             memset(response, 0, sizeOfBuffer); 
@@ -97,13 +107,22 @@ int main(int argc, char *argv[]){
 
             // null terminate to treat response as C string
             response[num_bytes_received] = '\0'; 
+
+            // check if the EOF sentinel (\x04) is present in the received data.
+            // if found, strip it and print everything before it, then break out of the loop.
+            char *eof_pos = memchr(response, '\x04', num_bytes_received);
+            if (eof_pos) {
+                *eof_pos = '\0';
+                if (eof_pos > response) {
+                    printf("%s", response);
+                    fflush(stdout);
+                }
+                break;
+            }
+
+            // sentinel not yet received — print this chunk and keep waiting for more
             printf("%s", response); 
             fflush(stdout); 
-
-            // break if we received all the data 
-            if (num_bytes_received < sizeOfBuffer - 1){
-                break; 
-            }
         }
     }
 
