@@ -11,7 +11,7 @@ TARGET = myshell
 OBJS = main.o executor.o parser.o
 
 # Link all object files into the final executable
-all: $(TARGET) server client
+all: $(TARGET) server client demo
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
@@ -26,18 +26,29 @@ executor.o: executor.c common.h
 parser.o: parser.c common.h
 	$(CC) $(CFLAGS) -c parser.c
 
-# Remove all generated files for a clean rebuild
-clean:
-	rm -f $(TARGET) $(OBJS) server client server.o client.o
+server: server.o scheduler.o executor.o parser.o
+	$(CC) $(CFLAGS) -o server server.o scheduler.o executor.o parser.o -lpthread -lrt
 
-server: server.o executor.o parser.o
-	$(CC) $(CFLAGS) -o server server.o executor.o parser.o -lpthread
-
-server.o: server.c common.h
+server.o: server.c common.h scheduler.h
 	$(CC) $(CFLAGS) -c server.c
+
+scheduler.o: scheduler.c scheduler.h
+	$(CC) $(CFLAGS) -c scheduler.c
 
 client: client.o
 	$(CC) $(CFLAGS) -o client client.o
 
 client.o: client.c
 	$(CC) $(CFLAGS) -c client.c
+
+demo: demo.o
+	$(CC) $(CFLAGS) -o demo demo.o
+ 
+demo.o: demo.c
+	$(CC) $(CFLAGS) -c demo.c
+
+# Remove all generated files for a clean rebuild
+clean:
+	rm -f myshell server client demo \
+	      main.o executor.o parser.o \
+	      server.o scheduler.o client.o demo.o
