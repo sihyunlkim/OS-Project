@@ -269,9 +269,10 @@ static void *scheduler_thread(void *arg) {
         // use the smaller quantum on the first round so short tasks finish quickly
         int quantum = (task->round == 0) ? QUANTUM_ROUND0 : QUANTUM_REST;
 
-        // log the start of this scheduling slot
-        printf("[%d]--- started (%d)\n", task->client_num, task->burst_time);
-        printf("[%d]--- waiting (%d)\n", task->client_num, task->remaining);
+        // log started only on the first round; subsequent rounds skip straight to running
+        if (task->round == 0) {
+            printf("[%d]--- started (%d)\n", task->client_num, task->burst_time);
+        }
         fflush(stdout);
 
         // record this slot in the execution timeline
@@ -365,6 +366,9 @@ void scheduler_enqueue(Task *t) {
     }
 
     enqueue_locked(t);
+    // log that this task is now waiting in the queue
+    printf("[%d]--- waiting (%d)\n", t->client_num, t->remaining);
+    fflush(stdout);
     pthread_mutex_unlock(&queue_mutex);
 
     // signal the semaphore to wake the scheduler thread

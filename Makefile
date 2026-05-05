@@ -44,7 +44,7 @@ client.o: client.c
 demo: demo.o
 	$(CC) $(CFLAGS) -o demo demo.o
  
-demo.o: demo.c
+demo.o: demo.
 	$(CC) $(CFLAGS) -c demo.c
 
 # Remove all generated files for a clean rebuild
@@ -52,3 +52,4 @@ clean:
 	rm -f myshell server client demo \
 	      main.o executor.o parser.o \
 	      server.o scheduler.o client.o demo.o
+		  
