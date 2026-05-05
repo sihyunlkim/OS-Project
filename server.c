@@ -187,7 +187,7 @@ void *handling_client(void *arg){
 
         // break if the client disconnected or error occured on the socket
         if (received_bytes <= 0){
-            printf("[INFO] %s Client disconnected.\n", client_arg->client_num);
+            printf("[INFO] %d Client disconnected.\n", client_arg->client_num);
             fflush(stdout);
             break;  
         }
@@ -347,7 +347,7 @@ int main() {
         struct sockaddr_in client_addr; 
         socklen_t client_addrlen = sizeof(client_addr); 
 
-        int client_fd = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&client_addrlen);
+        int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, (socklen_t *)&client_addrlen);
         if (client_fd < 0) {
             perror("accept");
             continue;
